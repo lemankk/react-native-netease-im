@@ -18,6 +18,8 @@
 #import "BankListViewController.h"
 #import "ImConfig.h"
 
+@import WebKit;
+
 #define kDevice_Is_iPhoneX ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
 
 @interface RNNeteaseIm(){
@@ -822,11 +824,17 @@ RCT_EXPORT_METHOD(getNetWorkStatus:(RCTPromiseResolveBlock)resolve
 RCT_EXPORT_METHOD(setupWebViewUserAgent){
     if (!strUserAgent.length) {
         NSString *version = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleShortVersionString"];
-        NSString *userAgent = [[[UIWebView alloc] init] stringByEvaluatingJavaScriptFromString:@"navigator.userAgent"];
-        strUserAgent = [userAgent stringByAppendingFormat:@" Feima/%@ NetType/", version];
+        
+        // Convert into WKWebView
+        WKWebView *webView = [[WKWebView alloc] initWithFrame:CGRectMake(0,0,100,100)];
+        [webView loadHTMLString:@"<html></html>" baseURL:nil];
+        [webView evaluateJavaScript:@"navigator.userAgent" completionHandler:^(id __nullable userAgent, NSError * __nullable error) {
+            NSString *strUserAgent = [userAgent stringByAppendingFormat:@" Feima/%@ NetType/", version];
+            
+            NSString *strNetWork = [self getNetStatus];
+            [[NSUserDefaults standardUserDefaults] registerDefaults:@{@"UserAgent":[NSString stringWithFormat:@"%@%@",strUserAgent,strNetWork]}];
+        }];
     }
-    NSString *strNetWork = [self getNetStatus];
-    [[NSUserDefaults standardUserDefaults] registerDefaults:@{@"UserAgent":[NSString stringWithFormat:@"%@%@",strUserAgent,strNetWork]}];
 }
 
 //获取网络状态
