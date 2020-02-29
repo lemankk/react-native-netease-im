@@ -185,6 +185,10 @@
         [dic setObject:[NSString stringWithFormat:@"%@", recent.lastMessage.messageId] forKey:@"messageId"];
         //消息内容
         [dic setObject:[NSString stringWithFormat:@"%@", [self contentForRecentSession:recent] ] forKey:@"content"];
+        
+        // Mesage Object
+        [dic setObject:[self normaliseContentForRecentSession:recent]forKey:@"msgObject"];
+        
         //发送时间
         [dic setObject:[NSString stringWithFormat:@"%@", [self timestampDescriptionForRecentSession:recent] ] forKey:@"time"];
         
@@ -193,7 +197,6 @@
             NIMTeam *team = [[[NIMSDK sharedSDK] teamManager]teamById:recent.lastMessage.session.sessionId];
             [dic setObject:[NSString stringWithFormat:@"%ld",team.memberNumber] forKey:@"memberCount"];
         }
-       
         [sessionList addObject:dic];
     }
     if (sessionList) {
@@ -210,8 +213,6 @@
     NSArray *NIMlistArr = [[NIMSDK sharedSDK].conversationManager.allRecentSessions mutableCopy];
     NSMutableArray *sessionList = [NSMutableArray array];
     for (NIMRecentSession *recent in NIMlistArr) {
-        
-        
         if (recent.session.sessionType == NIMSessionTypeP2P) {
             NSMutableDictionary *dic = [NSMutableDictionary dictionary];
             [dic setObject:[NSString stringWithFormat:@"%@",recent.session.sessionId] forKey:@"contactId"];
@@ -310,6 +311,14 @@
     NSString *content = [self messageContent:recent.lastMessage];
     return content;
 }
+
+// Normalise Message Object
+- (NSDictionary *) normaliseContentForRecentSession:(NIMRecentSession *)recent{
+    NSMutableDictionary* dic = [NSMutableDictionary dictionaryWithDictionary:[self normaliseMessageContent:recent.lastMessage]];
+    [dic setObject:[NSString stringWithFormat:@"%@", [self contentForRecentSession:recent] ] forKey:@"oContent"];
+    return dic;
+}
+
 //会话时间
 - (NSString *)timestampDescriptionForRecentSession:(NIMRecentSession *)recent{
     return [NIMKitUtil showTime:recent.lastMessage.timestamp showDetail:NO];
@@ -356,6 +365,40 @@
         return nickName.length ? [nickName stringByAppendingFormat:@" : %@",text] : @"";
     }
 }
+
+- (NSDictionary *)normaliseMessageContent:(NIMMessage*)lastMessage{
+    NSMutableDictionary *from = [[NSMutableDictionary alloc] init];
+    [from setObject:lastMessage.from forKey:@"account"];
+    [from setObject:[NIMKitUtil showNick:lastMessage.from inSession:lastMessage.session] forKey:@"username"];
+    
+    NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
+    [dic setValue:[NIMKitUtil messageTypeToString:lastMessage.messageType] forKey:@"type"];
+    [dic setValue:lastMessage.text forKey:@"text"];
+    [dic setValue:from forKey:@"from"];
+    
+    
+    if (lastMessage.messageType == NIMMessageTypeNotification) {
+        [dic setValue:[self normaliseNotificationContent:lastMessage] forKey:@"notification"];
+    }
+    return dic;
+}
+
+- (NSDictionary *)normaliseNotificationContent:(NIMMessage*)lastMessage{
+    NIMNotificationObject *object = lastMessage.messageObject;
+    NIMTeamNotificationContent *content = (NIMTeamNotificationContent*)object.content;
+    NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
+    [dic setValue:[NIMKitUtil notificationTypeToString:object.notificationType] forKey:@"type"];
+    if (object.notificationType == NIMNotificationTypeTeam) {
+        [dic setValue:[NIMKitUtil notificationTeamOperationTypeToString:content.operationType] forKey:@"operationType"];
+        [dic setObject:[NIMKitUtil teamNotificationDetail:lastMessage] forKey:@"detail"];
+    } else if (object.notificationType == NIMNotificationTypeNetCall){
+        
+    } else if (object.notificationType == NIMNotificationTypeChatroom){
+           
+    }
+    return dic;
+}
+
 //获得数据类型
 - (NSString *)getCustomType:(NIMMessage *)message{
     NIMCustomObject *customObject = message.messageObject;

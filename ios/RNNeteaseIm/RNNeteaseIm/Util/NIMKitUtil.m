@@ -39,7 +39,10 @@
     return [[NIMKit sharedKit] infoByUser:uid option:option].showName;
 }
 
-
++ (NSString *)showTeamName:(NIMMessage *)message{
+    NIMTeam *team = [[NIMSDK sharedSDK].teamManager teamById:message.session.sessionId];
+    return team.teamName;
+}
 
 
 + (NSString*)showTime:(NSTimeInterval) msglastTime showDetail:(BOOL)showDetail
@@ -161,6 +164,30 @@
     }
 }
 
++ (NSDictionary *) teamNotificationDetail:(NIMMessage *)message {
+    NSMutableDictionary* dic = [[NSMutableDictionary alloc] init];
+    NIMNotificationObject *object = message.messageObject;
+    NIMTeamNotificationContent *content = (NIMTeamNotificationContent*)object.content;
+    
+    NSMutableDictionary *from = [[NSMutableDictionary alloc] init];
+    [from setObject:content.sourceID forKey:@"account"];
+    [from setObject:[NIMKitUtil showNick:content.sourceID inSession:message.session] forKey:@"username"];
+    
+    [dic setValue:from forKey:@"source"];
+    
+    NSMutableArray *targets = [[NSMutableArray alloc] init];
+    for (NSString *item in content.targetIDs) {
+        NSMutableDictionary *target = [[NSMutableDictionary alloc] init];
+        [from setObject:item forKey:@"account"];
+        [from setObject:[NIMKitUtil showNick:item inSession:message.session] forKey:@"username"];
+        [targets addObject:target];
+    }
+    [dic setValue:from forKey:@"targets"];
+    
+    NSString *teamName = [NIMKitUtil showTeamName:message];
+    [dic setValue:teamName forKey:@"teamName"];
+    return dic;
+}
 
 + (NSString*)teamNotificationFormatedMessage:(NIMMessage *)message{
     NSString *formatedMessage = @"";
@@ -438,6 +465,7 @@
     NIMNotificationObject *object = message.messageObject;
     NIMTeamNotificationContent *content = (NIMTeamNotificationContent*)object.content;
     NSString *currentAccount = [[NIMSDK sharedSDK].loginManager currentAccount];
+    
     if ([content.sourceID isEqualToString:currentAccount]) {
         source = @"你";
     }else{
@@ -494,6 +522,113 @@
         return member.type == NIMTeamMemberTypeOwner || member.type == NIMTeamMemberTypeManager || member.type == NIMTeamMemberTypeNormal;
     }
 
+}
+
++ (NSString*)messageTypeToString:(NIMMessageType)type {
+    NSString *result = nil;
+
+    switch(type) {
+        case NIMMessageTypeText:
+            result = @"0";
+            break;
+        case NIMMessageTypeImage:
+            result = @"1";
+            break;
+        case NIMMessageTypeAudio:
+            result = @"2";
+            break;
+        case NIMMessageTypeVideo:
+            result = @"3";
+            break;
+        case NIMMessageTypeLocation:
+            result = @"4";
+            break;
+        case NIMMessageTypeNotification:
+            result = @"5";
+            break;
+        case NIMMessageTypeFile:
+            result = @"6";
+            break;
+        case NIMMessageTypeTip:
+            result = @"10";
+            break;
+        case NIMMessageTypeRobot:
+            result = @"11";
+            break;
+        case NIMMessageTypeCustom:
+            result = @"100";
+            break;
+        default:
+            result = @"99";
+            break;
+    }
+    return result;
+}
+
++ (NSString*)notificationTypeToString:(NIMNotificationType)type {
+    NSString *result = nil;
+
+    switch(type) {
+        case NIMNotificationTypeUnsupport:
+            result = @"0";
+            break;
+        case NIMNotificationTypeTeam:
+            result = @"1";
+            break;
+        case NIMNotificationTypeNetCall:
+            result = @"2";
+            break;
+        case NIMNotificationTypeChatroom:
+            result = @"3";
+            break;
+        default:
+            result = @"99";
+            break;
+    }
+    return result;
+}
+
++ (NSString*)notificationTeamOperationTypeToString:(NIMTeamOperationType)type{
+    NSString *result = nil;
+    switch(type) {
+        case NIMTeamOperationTypeInvite:
+            result = @"0";
+            break;
+        case NIMTeamOperationTypeKick:
+            result = @"1";
+            break;
+        case NIMTeamOperationTypeLeave:
+            result = @"2";
+            break;
+        case NIMTeamOperationTypeUpdate:
+            result = @"3";
+            break;
+        case NIMTeamOperationTypeDismiss:
+            result = @"4";
+            break;
+        case NIMTeamOperationTypeApplyPass:
+            result = @"5";
+            break;
+        case NIMTeamOperationTypeTransferOwner:
+            result = @"6";
+            break;
+        case NIMTeamOperationTypeAddManager:
+            result = @"7";
+            break;
+        case NIMTeamOperationTypeRemoveManager:
+            result = @"8";
+            break;
+        case NIMTeamOperationTypeAcceptInvitation:
+            result = @"9";
+            break;
+        case NIMTeamOperationTypeMute:
+            result = @"10";
+            break;
+        default:
+            result = @"99";
+            break;
+    }
+    return result;
 }
 
 @end

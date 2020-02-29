@@ -26,4 +26,12 @@
 
 + (NSString*)teamNotificationFormatedMessage:(NIMMessage *)message;
 
++ (NSString*)messageTypeToString:(NIMMessageType)type;
+
++ (NSString*)notificationTypeToString:(NIMNotificationType)type;
+
++ (NSString*)notificationTeamOperationTypeToString:(NIMTeamOperationType)type;
+
++ (NSDictionary *)teamNotificationDetail:(NIMMessage *)message;
+
 @end
