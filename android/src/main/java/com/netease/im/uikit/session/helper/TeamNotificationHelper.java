@@ -54,6 +54,30 @@ public class TeamNotificationHelper {
         return text;
     }
 
+    public static WritableMap teamNotificationDetail(String tid, String fromAccount, NotificationAttachment attachment) {
+        WritableMap map = Arguments.createMap();
+
+        WritableMap sourceMap = Arguments.createMap();
+        sourceMap.putString("account", fromAccount);
+        sourceMap.putString("username", getTeamMemberDisplayName(fromAccount));
+
+        WritableArray targetsMap = Arguments.createArray();
+        WritableMap tempMap;
+        for (String target : a.getTargets()) {
+            tempMap = Arguments.createMap();
+            tempMap.putString("account", target);
+            tempMap.putString("username", getTeamMemberDisplayName(target));
+            targetsMap.pushMap(tempMap);
+        }
+        Team team = TeamDataCache.getInstance().getTeamById(tid);
+
+        map.putString("teamName", team.getName());
+        map.putMap("source", sourceMap);
+        map.putArray("targets", targetsMap);
+
+        return map;
+    }
+
     private static String buildNotification(String tid, String fromAccount, NotificationAttachment attachment) {
         String text;
         switch (attachment.getType()) {

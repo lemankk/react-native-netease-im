@@ -282,9 +282,33 @@ public class ReactCache {
                 }
                 content = teamNick + content;
                 map.putString("content", content);
+
+                
+                
+                WritableMap fromMap = Arguments.createMap();
+                fromMap.putString("account", contact.getFromAccount());
+                fromMap.putString("username", fromNick);
+
+                WritableMap msgMap = Arguments.createMap();
+                msgMap.putString("oContent", content);
+                msgMap.putMap("from", fromMap);
+                msgMap.putString("text", contact.getContent());
+                msgMap.putString("type", getMessageTypeNumber(contact.getMsgType()));
+
+                if (contact.getMsgType() == MsgTypeEnum.notification && sessionType == SessionTypeEnum.Team && team != null) {
+                    WritableMap teamNoti = Arguments.createMap();
+                    NotificationAttachment attachment = (NotificationAttachment) contact.getAttachment();
+                    teamNoti.putString("type", "1");
+                    teamNoti.putString("operationType", getNotificationTeamOperationTypeNumber(attachment));
+                    WritableMap detail = TeamNotificationHelper.teamNotificationDetail(contact.getContactId(),
+                                            contact.getFromAccount(),
+                                            (NotificationAttachment) contact.getAttachment());
+                    teamNoti.putMap("detail", detail);
+                    msgMap.putMap("notification", teamNoti);
+                }
+
                 array.pushMap(map);
             }
-//            LogUtil.w(TAG, array + "");
         }
         writableMap.putArray("recents", array);
         writableMap.putString("unreadCount", Integer.toString(unreadNumTotal));
@@ -836,6 +860,89 @@ public class ReactCache {
                 return MessageConstant.MsgStatus.SEND_DRAFT;
         }
 
+    }
+
+    static String getMessageTypeNumber(MsgTypeEnum typeEnum) {
+        String type = "100";
+        switch (typeEnum) {
+            case text:
+                type = "0";
+                break;
+            case image:
+                type = "1";
+                break;
+            case audio:
+                type = "2";
+                break;
+            case video:
+                type = "3";
+                break;
+            case location:
+                type = "4";
+                break;
+            case notification:
+                type = "5";
+                break;
+            case file:
+                type = "6";
+                break;
+            case tip:
+                type = "10";
+                break;
+            case robot:
+                type = "11";
+                break;
+            case custom:
+                type = "100";
+                break;
+            default:
+                type = "99";
+                break;
+        }
+        return type;
+    }
+    
+    static String getNotificationTeamOperationTypeNumber(NotificationAttachment attachment) {
+        String type;
+        switch (attachment.getType()) {
+            case InviteMember:
+                type = "0";
+                break;
+            case KickMember:
+                type = "1";
+                break;
+            case LeaveTeam:
+                type = "2";
+                break;
+            case DismissTeam:
+                type = "3";
+                break;
+            case UpdateTeam:
+                type = "4";
+                break;
+            case PassTeamApply:
+                type = "5";
+                break;
+            case TransferOwner:
+                type = "6";
+                break;
+            case AddTeamManager:
+                type = "7";
+                break;
+            case RemoveTeamManager:
+                type = "8";
+                break;
+            case AcceptInvite:
+                type = "9";
+                break;
+            case MuteTeamMember:
+                type = "10";
+                break;
+            default:
+                type = "99";
+                break;
+        }
+        return type;
     }
 
     final static String MESSAGE_EXTEND = MessageConstant.Message.EXTEND;
