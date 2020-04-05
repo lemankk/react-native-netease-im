@@ -63,7 +63,7 @@ public class TeamNotificationHelper {
 
         WritableArray targetsMap = Arguments.createArray();
         WritableMap tempMap;
-        for (String target : a.getTargets()) {
+        for (String target : attachment.getTargets()) {
             tempMap = Arguments.createMap();
             tempMap.putString("account", target);
             tempMap.putString("username", getTeamMemberDisplayName(target));
