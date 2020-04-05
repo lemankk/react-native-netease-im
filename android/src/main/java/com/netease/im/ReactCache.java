@@ -51,6 +51,7 @@ import com.netease.nimlib.sdk.msg.model.IMMessage;
 import com.netease.nimlib.sdk.msg.model.RecentContact;
 import com.netease.nimlib.sdk.msg.model.SystemMessage;
 import com.netease.nimlib.sdk.team.constant.TeamMessageNotifyTypeEnum;
+import com.netease.nimlib.sdk.team.model.MemberChangeAttachment;
 import com.netease.nimlib.sdk.team.model.Team;
 import com.netease.nimlib.sdk.team.model.TeamMember;
 import com.netease.nimlib.sdk.uinfo.model.NimUserInfo;
@@ -295,18 +296,35 @@ public class ReactCache {
                 msgMap.putString("text", contact.getContent());
                 msgMap.putString("type", getMessageTypeNumber(contact.getMsgType()));
 
+
                 if (contact.getMsgType() == MsgTypeEnum.notification && sessionType == SessionTypeEnum.Team && team != null) {
                     WritableMap teamNoti = Arguments.createMap();
-                    NotificationAttachment attachment = (NotificationAttachment) contact.getAttachment();
-                    teamNoti.putString("type", "1");
-                    teamNoti.putString("operationType", getNotificationTeamOperationTypeNumber(attachment));
-                    WritableMap detail = TeamNotificationHelper.teamNotificationDetail(contact.getContactId(),
-                                            contact.getFromAccount(),
-                                            (NotificationAttachment) contact.getAttachment());
-                    teamNoti.putMap("detail", detail);
+                    NotificationAttachment nAttachment = (NotificationAttachment) contact.getAttachment();
+                    WritableMap detail;
+                    switch (nAttachment.getType()) {
+                        case InviteMember:
+                        case KickMember:
+                        case PassTeamApply:
+                        case TransferOwner:
+                        case AddTeamManager:
+                        case RemoveTeamManager:
+                        case AcceptInvite:
+                            teamNoti.putString("type", "1");
+                            teamNoti.putString("operationType", getNotificationTeamOperationTypeNumber(nAttachment));
+                            detail = TeamNotificationHelper.teamNotificationDetail(contact.getContactId(),
+                                    contact.getFromAccount(),
+                                    (MemberChangeAttachment) contact.getAttachment());
+                            teamNoti.putMap("detail", detail);
+                            break;
+                        default:
+                        case LeaveTeam:
+                        case DismissTeam:
+                        case UpdateTeam:
+                        case MuteTeamMember:
+                            break;
+                    }
                     msgMap.putMap("notification", teamNoti);
                 }
-
                 array.pushMap(map);
             }
         }

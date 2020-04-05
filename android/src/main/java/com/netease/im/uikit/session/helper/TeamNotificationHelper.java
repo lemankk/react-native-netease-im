@@ -2,6 +2,11 @@ package com.netease.im.uikit.session.helper;
 
 import android.text.TextUtils;
 
+import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.ReactContext;
+
 import com.netease.im.IMApplication;
 import com.netease.im.R;
 import com.netease.im.uikit.cache.TeamDataCache;
@@ -54,7 +59,7 @@ public class TeamNotificationHelper {
         return text;
     }
 
-    public static WritableMap teamNotificationDetail(String tid, String fromAccount, NotificationAttachment attachment) {
+    public static WritableMap teamNotificationDetail(String tid, String fromAccount, MemberChangeAttachment attachment) {
         WritableMap map = Arguments.createMap();
 
         WritableMap sourceMap = Arguments.createMap();
@@ -166,7 +171,6 @@ public class TeamNotificationHelper {
         } else {
             sb.append(" 已被移出讨论组");
         }
-
 
         return sb.toString();
     }
