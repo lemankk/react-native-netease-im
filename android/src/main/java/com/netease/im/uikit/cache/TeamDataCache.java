@@ -1,6 +1,7 @@
 package com.netease.im.uikit.cache;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.netease.im.login.LoginService;
 import com.netease.im.uikit.common.util.log.LogUtil;
@@ -208,14 +209,19 @@ public class TeamDataCache {
      * 同步从本地获取Team（先从缓存中查询，如果不存在再从SDK DB中查询）
      */
     public Team getTeamById(String teamId) {
-        Team team = id2TeamMap.get(teamId);
+        try {
+            Team team = id2TeamMap.get(teamId);
 
-        if (team == null) {
-            team = NIMClient.getService(TeamService.class).queryTeamBlock(teamId);
-            addOrUpdateTeam(team);
+            if (team == null) {
+                team = NIMClient.getService(TeamService.class).queryTeamBlock(teamId);
+                addOrUpdateTeam(team);
+            }
+
+            return team;
+        } catch (Exception exp) {
+            Log.d("TeamDataCache", "unable to create team");
+            return  null;
         }
-
-        return team;
     }
 
     public String getTeamName(String teamId) {
