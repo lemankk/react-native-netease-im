@@ -150,13 +150,14 @@ public class TeamNotificationHelper {
         String selfName = getTeamMemberDisplayName(fromAccount);
 
         sb.append(selfName);
-        sb.append("邀请 ");
+        sb.append("Welcome ");
         sb.append(buildMemberListString(a.getTargets(), fromAccount));
         Team team = TeamDataCache.getInstance().getTeamById(teamId.get());
         if (team.getType() == TeamTypeEnum.Advanced) {
-            sb.append(" 加入群");
+            sb.append("to join ");
+            sb.append(team.getName());
         } else {
-            sb.append(" 加入讨论组");
+            sb.append("to join discussion");
         }
 
         return sb.toString();
@@ -167,9 +168,10 @@ public class TeamNotificationHelper {
         sb.append(buildMemberListString(a.getTargets(), null));
         Team team = TeamDataCache.getInstance().getTeamById(teamId.get());
         if (team.getType() == TeamTypeEnum.Advanced) {
-            sb.append(" 已被移出群");
+            sb.append(" has been removed from ");
+            sb.append(team.getName());
         } else {
-            sb.append(" 已被移出讨论组");
+            sb.append(" has been removed");
         }
 
         return sb.toString();
@@ -179,15 +181,15 @@ public class TeamNotificationHelper {
         String tip;
         Team team = TeamDataCache.getInstance().getTeamById(teamId.get());
         if (team.getType() == TeamTypeEnum.Advanced) {
-            tip = " 离开了群";
+            tip = " leaved " + team.getName();
         } else {
-            tip = " 离开了讨论组";
+            tip = " leaved";
         }
         return getTeamMemberDisplayName(fromAccount) + tip;
     }
 
     private static String buildDismissTeamNotification(String fromAccount) {
-        return getTeamMemberDisplayName(fromAccount) + " 解散了群";
+        return getTeamMemberDisplayName(fromAccount) + " Disbanded!";
     }
 
     private static String buildUpdateTeamNotification(String tid, String account, UpdateTeamAttachment a) {
@@ -246,7 +248,7 @@ public class TeamNotificationHelper {
         sb.append("管理员通过用户 ");
         sb.append(buildMemberListString(a.getTargets(), null));
         sb.append(" 的入群申请");
-
+    
         return sb.toString();
     }
 
@@ -280,9 +282,11 @@ public class TeamNotificationHelper {
     private static String buildAcceptInviteNotification(String from, MemberChangeAttachment a) {
         StringBuilder sb = new StringBuilder();
 
-        sb.append(getTeamMemberDisplayName(from));
-        sb.append(" 接受了 ").append(buildMemberListString(a.getTargets(), null)).append(" 的入群邀请");
-
+//        sb.append(getTeamMemberDisplayName(from));
+//        sb.append(" 接受了 ").append(buildMemberListString(a.getTargets(), null)).append(" 的入群邀请");
+        sb.append("Welcome ");
+        sb.append(buildMemberListString(a.getTargets(), null));
+        sb.append("to join");
         return sb.toString();
     }
 
