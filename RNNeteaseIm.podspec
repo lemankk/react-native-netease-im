@@ -27,6 +27,6 @@ Pod::Spec.new do |s|
   s.source_files        = "**/*.{h,m}"
 
   s.dependency 'React-Core'
-  s.dependency "NIMSDK", "6.2.0"
+  s.dependency "NIMSDK", "7.7.2"
   
 end
