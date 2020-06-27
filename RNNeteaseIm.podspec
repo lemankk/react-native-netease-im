@@ -6,7 +6,7 @@ require "json"
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 version = package['version']
 
-source = { :git => 'https://github.com/reactnativecomponent/react-native-netease-im.git' }
+source = { :git => 'https://github.com/lemankk/react-native-netease-im.git' }
 if version == '1000.0.0'
   # This is an unpublished version, use the latest commit hash of the react-native repo, which we’re presumably in.
   source[:commit] = `git rev-parse HEAD`.strip
